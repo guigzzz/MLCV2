@@ -92,12 +92,9 @@ class Annotator:
                 print('Found annotations for {} @ {}, loading...'.format(self.image_paths[i], annot))
                 with open(annot, 'r') as f:
                     try:
-                        data = [list(map(int, c.split(' '))) for c in f.read().split('\n')]
+                        coords[i] = [list(map(int, c.split(' '))) for c in f.read().split('\n')]
                     except ValueError:
-                        data = []
                         print('==> WARNING: annotations for {} found, but file is empty'.format(self.image_paths[i]))
-
-                coords[i] = data
             else:
                 print('==> WARNING: annotations for {} not found'.format(self.image_paths[i]))
 
