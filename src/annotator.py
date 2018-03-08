@@ -45,8 +45,8 @@ class Annotator:
 
     def display_images(self, show = False):
         self.fig, self.axes = plt.subplots(1, 2)
-        self.axes[0].imshow(self.images[0])
-        self.axes[1].imshow(self.images[1])
+        self.axes[0].imshow(self.images[0], cmap='gray')
+        self.axes[1].imshow(self.images[1], cmap='gray')
 
         if self.coords[0]:
             x, y = zip(*self.coords[0])
@@ -75,37 +75,52 @@ class Annotator:
         plt.show()
 
     def save_annotations(self):
-        annotation_names = self.process_paths()
+        annotation_name = self.get_annotation_name()
 
-        for i, annot in enumerate(annotation_names):
-            print('Saving annotations for {} to {}'.format(self.image_paths[i], annot))
-            string_coords = '\n'.join([' '.join(list(map(str, c))) for c in self.coords[i]])
-            with open(annot, 'w') as f:
-                f.write(string_coords)
+        print('> Saving annotations to {}...'.format(annotation_name))
+        with open(annotation_name, 'w') as f:
+            f.write('{}\n'.format(len(self.coords[0])))
+            for i in range(len(self.image_paths)):
+                f.write(self.image_paths[i] + '\n')
+                string_coords = '\n'.join([' '.join(list(map(str, c))) for c in self.coords[i]])
+                f.write(string_coords + '\n')
 
     def __look_for_annotations(self):
-        annotation_names = self.process_paths()
+        annot = self.get_annotation_name()
+
+        print('Image Files:\n> {}\n> {}\nSearching for annotation file: {}'.format(
+            self.image_paths[0], self.image_paths[1], annot))
+
         coords = [[], []]
 
-        for i, annot in enumerate(annotation_names):
-            if path.exists(annot):
-                print('Found annotations for {} @ {}, loading...'.format(self.image_paths[i], annot))
-                with open(annot, 'r') as f:
-                    try:
-                        coords[i] = [list(map(int, c.split(' '))) for c in f.read().split('\n')]
-                    except ValueError:
-                        print('==> WARNING: annotations for {} found, but file is empty'.format(self.image_paths[i]))
-            else:
-                print('==> WARNING: annotations for {} not found'.format(self.image_paths[i]))
+        if path.exists(annot):
+            print('> Annotation file found.')
+
+            with open(annot, 'r') as f:
+                try:
+                    data = f.read().split('\n')
+                    if data[-1] == '':
+                        data = data[:-1]
+
+                    num = int(data[0])
+                    coords[0] = [list(map(int, c.split(' '))) for c in data[2 : num+2]]
+                    coords[1] = [list(map(int, c.split(' '))) for c in data[num + 3 :]]
+
+                except ValueError:
+                    pass # silently fail as file is probably empty
+                    
+        else:
+            print('> WARNING: Annotation file not found.')
 
         return coords
 
-    def process_paths(self):
-        images = ['.'.join(path.basename(p).split('.')[:-1]) for p in self.image_paths]
-        return ['{}_annotation.txt'.format(name) for name in images]
+    def get_annotation_name(self):
+        names = ['.'.join(path.basename(p).split('.')[:-1]) for p in self.image_paths]
+        return '{}_{}_annotation.txt'.format(names[0], names[1])
 
 
 if __name__ == '__main__':
+    
     # ann = Annotator('edge.PNG', 'edge.1.PNG', check_for_annotations = True) # create annotator object
     # ann.annotate() # begin annotating images
     # ann.save_annotations() # write annotations to disk
@@ -113,6 +128,7 @@ if __name__ == '__main__':
     # ann = Annotator('edge.PNG', 'edge.1.PNG', annotation_mode = False) # create annotator object in simple display mode 
     # ann.display_images(show=True) # display images + annotations
 
-    ann = Annotator('bridge_left.JPG', 'bridge_right.JPG', check_for_annotations = True) # create annotator object
+    import sys
+    ann = Annotator(sys.argv[1], sys.argv[2], check_for_annotations = True) # create annotator object
     ann.annotate() # begin annotating images
     ann.save_annotations() # write annotations to disk
