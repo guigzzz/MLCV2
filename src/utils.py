@@ -38,3 +38,6 @@ def plot_side_by_side(im1, im2):
     plt.subplot(1, 2, 2)
     plt.imshow(im2)
     plt.show()
+    
+def rgb_to_grey(img): 
+    return 0.299 * img[:, :, 0] + 0.587 * img[:, :, 1] + 0.114 * img[:, :, 2] 
