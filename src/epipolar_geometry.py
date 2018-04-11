@@ -112,3 +112,25 @@ def drawEpipolarLines(F, points):
 
     for line in lines:
         __drawEpipolarLine(line, bounds)
+
+
+def drawMatch(im1, im2, p1, p2):
+    plt.figure(figsize=(10, 10))
+    plt.imshow(np.concatenate((
+        im1, im2
+    ), axis=1))
+
+    plt.scatter(p1[:, 0], p1[:, 1], marker='x', c='r')
+    plt.scatter(p2[:, 0] + im1.shape[1], p2[:, 1], marker='o', c='y')
+
+    for point1, point2 in zip(p1, p2):
+        x1, y1 = point1[0], point1[1]
+        x2, y2 = point2[0], point2[1]
+
+        x2 += im1.shape[1]
+
+        plt.plot([x1, x2], [y1, y2], c='g')
+
+    plt.xlim([0, im1.shape[1] + im2.shape[1]])
+    plt.axis("off")
+    plt.show()
