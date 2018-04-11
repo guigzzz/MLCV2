@@ -48,16 +48,34 @@ def get_patch_histograms_from_interest_points_vec(img, interest_points, bins, pa
     # compute histograms for every selected image patch
     return histogram_along_rows(selected_patches.reshape(selected_patches.shape[0], -1), bins), (y, x)
 
-def match_descriptors_nn(descriptors1, descriptors2):
-    dists = euclidean_distances(descriptors1, descriptors2)
-    return np.argmin(dists, axis = 1)
+from sklearn.neighbors import NearestNeighbors
 
+def match_descriptors_nn(descriptors1, descriptors2, ratio_test_ratio=0.8):
 
+    nbrs = NearestNeighbors(n_neighbors=2).fit(descriptors2)
+    d, inds = nbrs.kneighbors(descriptors1)
 
+    inds_d1 = np.arange(len(descriptors1))
+    selector = d[:, 0] < ratio_test_ratio * d[:, 1]
+    return inds_d1[selector], inds[selector, 0]
 
+    # dists = euclidean_distances(descriptors1, descriptors2)
+    # return np.argmin(dists, axis = 1)
 
+def filter_for_multiple_matches(ind1, ind2):
+    
+    uniques1, counts1 = np.unique(ind1, return_counts=True)
+    uniques1 = set(uniques1[counts1 == 1])
 
+    uniques2, counts2 = np.unique(ind2, return_counts=True)
+    uniques2 = set(uniques2[counts2 == 1])
 
+    sel = np.array([
+        a in uniques1 and b in uniques2
+        for a, b in zip(ind1, ind2)
+    ])
+
+    return ind1[sel], ind2[sel]
 
 
 

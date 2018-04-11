@@ -38,6 +38,23 @@ def plot_side_by_side(im1, im2):
     plt.subplot(1, 2, 2)
     plt.imshow(im2)
     plt.show()
+
+def show_interest_side_by_side(im1, im2, p1, p2):
+    plt.figure(figsize=[10, 20])
+    plt.subplot(1, 2, 1)
+    plt.imshow(im1)
+    plt.scatter(p1[:, 0], p1[:, 1], marker='x', c='r')
+    plt.axis('off')
+    plt.subplot(1, 2, 2)
+    plt.imshow(im2)
+    plt.scatter(p2[:, 0], p2[:, 1], marker='x', c='r')
+    plt.axis('off')
+    plt.show()
     
 def rgb_to_grey(img): 
     return 0.299 * img[:, :, 0] + 0.587 * img[:, :, 1] + 0.114 * img[:, :, 2] 
+
+def add_column_ones(arr):
+    return np.concatenate((
+        arr, np.ones((arr.shape[0], 1))
+    ), axis = 1)

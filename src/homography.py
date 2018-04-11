@@ -87,7 +87,5 @@ def ransac_homography(points, points_prime, error_threshold=1, max_iter=1000):
         
         iterations += 1
 
-    print(Sin)
-
     return get_normalised_homography_matrix(points[Sin], points_prime[Sin])
     
